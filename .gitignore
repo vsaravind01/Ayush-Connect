@@ -1,0 +1,6 @@
+# intellij config
+/.idea/
+/backend/.idea/
+
+# virtualenv
+/backend/venv

@@ -22,9 +22,7 @@ then
     echo "  -h, --help                    Show this help message."
     echo ""
     echo "Files:"
-    echo "  elasticsearch   | es          Run docker-compose-es.yml."
-    echo "  kibana          | kib         Run docker-compose-kib.yml."
-    echo "  logstash        | log         Run docker-compose-log.yml."
+    echo "  elasticsearch   | elk          Run docker-compose-es.yml."
     exit 0
 fi
 
@@ -37,7 +35,7 @@ then
 fi
 
 # set file
-if [ "$file_option" = "elasticsearch" ] || [ "$file_option" = "es" ]
+if [ "$file_option" = "elasticsearch" ] || [ "$file_option" = "elk" ]
 then
     file="docker-compose-es.yml"
 else

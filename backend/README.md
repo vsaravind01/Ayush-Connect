@@ -1,7 +1,7 @@
 # Backend
 
 ## docker-runner
-The docker-runner.sh script is used to setup the docker containers for the backend. The script can be 
+The `docker-runner.sh` script is used to setup the docker containers for the backend. The script can be 
 used to setup the following containers:
 1. Elasticsearch
 2. Kibana

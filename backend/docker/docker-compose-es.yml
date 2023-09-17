@@ -1,15 +1,50 @@
-version: '3.3'
+version: '3.8'
 services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.9.2
     container_name: elasticsearch
     volumes:
-      - ~/elasticsearch_data:/usr/share/elasticsearch/data
+      - elasticsearch-data:/usr/share/elasticsearch/data
     ports:
       - "9200:9200"
+    restart: always
     environment:
-      ES_JAVA_OPTS: '-Xms256m -Xmx256m'
-      network.bind_host: 0.0.0.0
-      network.host: 0.0.0.0
-      discovery.type: single-node
-      xpack.security.enabled: false
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+  logstash:
+    image: logstash:8.9.2
+    container_name: logstash
+    environment:
+      discovery.seed_hosts: logstash
+    volumes:
+      - "./logstash_data:/usr/share/logstash/data"
+      - "./logstash_ingest_data/:/usr/share/logstash/ingest_data/"
+      - "./logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro"
+    ports:
+      - "9600:9600"
+    depends_on:
+      - elasticsearch
+  kibana:
+    depends_on:
+      - elasticsearch
+    image: docker.elastic.co/kibana/kibana:8.9.2
+    container_name: kibana
+    volumes:
+      - kibana-data:/usr/share/kibana/data
+      - ./kibana.yml:/usr/share/kibana/config/kibana.yml
+    ports:
+      - "5601:5601"
+    restart: always
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+volumes:
+  elasticsearch-data:
+    driver: local
+  kibana-data:
+    driver: local
+  logstash-data:
+    driver: local

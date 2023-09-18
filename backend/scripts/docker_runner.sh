@@ -17,6 +17,7 @@ then
     echo ""
     echo "Options:"
     echo "  -d, --daemon                  Run docker-compose in daemon mode."
+    echo "  -r, --run                     Run docker-compose with live logs."
     echo "  -l, --logs                    Run docker-compose in logs mode."
     echo "  -s, --stop                    Stop docker-compose."
     echo "  -h, --help                    Show this help message."
@@ -49,6 +50,9 @@ cd "$(dirname "$0")" || exit
 case ${cmd_option} in
     -d|--daemon)
         docker-compose -f "../docker/${file}" up -d
+        ;;
+    -r|--run)
+        docker-compose -f "../docker/${file}" up
         ;;
     -l|--logs)
         docker-compose -f "../docker/${file}" logs

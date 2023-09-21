@@ -5,6 +5,7 @@ A repository for the problem statement SIH1343.
 ### Prerequisites
 1. Python 3.8+ - Python 3.10 is recommended. [Get Python](https://www.python.org/downloads/release/python-31011/)
 2. Docker | Docker Compose - [Get Docker](https://docs.docker.com/get-docker/)
+3. PostgreSQL [Get PostgreSQL](https://www.postgresql.org/download/)
 
 After installing the above prerequisites, proceed to clone the repository - `git clone https://github.com/vsaravind01/Ayush-Connect.git`
 

@@ -3,7 +3,7 @@
 ## docker-runner
 
 > [!NOTE]  
-> Before getting started please make sure you have provided necessary permissions for the `docker-runner.sh` script.
+> Before getting started please make sure you have provided necessary permissions for the `./scripts/docker-runner.sh` script.
 > You can do this by running the following command: `chmod +x scripts/docker-runner.sh`
 
 The `docker-runner.sh` script is used to setup the docker containers for the backend. The script can be 
@@ -56,4 +56,37 @@ To view the logs of the containers, run the following command:
 To view the help menu, run the following command:
 ```bash
 ./scripts/docker-runner.sh -h
+```
+
+--------------------------------------------
+
+## Database Setup
+
+> [!NOTE]
+> Before getting started please make sure you have provided necessary permissions for the `./scripts/create_pgdb.sh` script.
+> You can do this by running the following command: `chmod +x scripts/create_pgdb.sh`. And also make sure you have installed 
+> postgresql in your system.
+
+The `create_pgdb.sh` script is used to setup the postgres database for the backend. The script can be
+used to setup the following:
+1. Create a new postgres user
+2. Create a new database
+
+#### Setup
+To setup the postgres database, run the following command:
+```bash
+./scripts/create_pgdb.sh
+```
+> **Note:** The script runs superuser commands. You will be prompted to enter your password.
+
+--------------------------------------------
+
+## Running the server
+
+> [!NOTE]
+> Before getting started please make sure you have provided necessary permissions for the `./scripts/start_server.sh` script.
+> You can do this by running the following command: `chmod +x scripts/start_server.sh`.
+
+```bash
+./scripts/start_server.sh
 ```

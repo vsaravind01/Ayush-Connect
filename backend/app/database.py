@@ -16,6 +16,6 @@ db_port = os.environ['DB_PORT']
 db_url = f"postgresql+psycopg://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
 
 sync_engine = create_engine(db_url)
-sessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=sync_engine)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=sync_engine)
 
 Base = declarative_base()

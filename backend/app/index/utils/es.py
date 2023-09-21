@@ -1,10 +1,27 @@
 from elasticsearch import Elasticsearch
 from fastapi.exceptions import HTTPException
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 
 class ElasticSearchClient:
-    def __init__(self, hosts: list):
+    def __init__(self, hosts: list = None):
+        if hosts is None:
+            hosts = [os.environ['ELASTICSEARCH_HOST']]
         self.client = Elasticsearch(hosts=hosts)
+
+    def index_exists(self, index_name: str) -> bool:
+        """
+        Check if an index exists or not
+
+        Parameters
+        ----------
+        index_name: str
+
+        """
+        return self.client.indices.exists(index_name)
 
     def create_index(self, index: str) -> bool:
         """
@@ -32,7 +49,7 @@ class ElasticSearchClient:
             try:
                 self.client.indices.create(index=index)
                 return True
-            except Exception as e:
+            except Exception:
                 raise HTTPException(status_code=500, detail="Index creation failed - Internal Server Error")
 
     def delete_index(self, index: str) -> bool:
@@ -59,10 +76,131 @@ class ElasticSearchClient:
             try:
                 self.client.indices.delete(index=index)
                 return True
-            except Exception as e:
+            except Exception:
                 raise HTTPException(status_code=500, detail="Index deletion failed - Internal Server Error")
         else:
             raise HTTPException(status_code=404, detail=f"Index - '{index}' does not exists")
+
+    def create_alias(self, index: str, alias: str) -> bool:
+        """
+        Create alias for given index
+
+        Parameters
+        ----------
+        index: str
+            Name of the index
+        alias: str
+            Alias name for the index
+
+        Returns
+        -------
+        bool
+            Status of the alias creation
+
+        Raises
+        ------
+        HTTPException
+            404 - If index does not exist
+            500 - If alias creation fails
+        """
+        if self.client.indices.exists(index):
+            try:
+                self.client.indices.put_alias(index=index, name=alias)
+                return True
+            except Exception:
+                raise HTTPException(status_code=500, detail="Alias creation failed - Internal Server Error")
+        else:
+            raise HTTPException(status_code=404, detail=f"Index - '{index}' does not exists")
+
+    def alias_exists(self, alias: str) -> bool:
+        """
+        Check if an alias exists or not
+
+        Parameters
+        ----------
+        alias: str
+
+        """
+        return self.client.indices.exists_alias(alias)
+
+    def delete_alias(self, index: str, alias: str) -> bool:
+        """
+        Delete alias for given index
+
+        Parameters
+        ----------
+        index: str
+            Name of the index
+        alias: str
+            Alias name for the index
+
+        Returns
+        -------
+        bool
+            Status of the alias deletion
+
+        Raises
+        ------
+        HTTPException
+            404 - If index does not exist
+            500 - If alias deletion fails
+        """
+        if self.client.indices.exists(index):
+            try:
+                self.client.indices.delete_alias(index=index, name=alias)
+                return True
+            except Exception:
+                raise HTTPException(status_code=500, detail="Alias deletion failed - Internal Server Error")
+        else:
+            raise HTTPException(status_code=404, detail=f"Index - '{index}' does not exists")
+
+    def update_alias(self, index: str, alias: str) -> bool:
+        """
+        Update alias for given index
+
+        Parameters
+        ----------
+        index: str
+            Name of the index
+        alias: str
+            Alias name for the index
+
+        Returns
+        -------
+        bool
+            Status of the alias update
+
+        Raises
+        ------
+        HTTPException
+            404 - If index does not exist
+            500 - If alias update fails
+        """
+        if self.client.indices.exists(index):
+            try:
+                # delete all existing aliases for the index
+                for alias_name in self.client.indices.get_alias(index).keys():
+                    self.delete_alias(index=index, alias=alias_name)
+                # create new alias for the index
+                return self.create_alias(index=index, alias=alias)
+            except Exception:
+                raise HTTPException(status_code=500, detail="Alias update failed - Internal Server Error")
+        else:
+            raise HTTPException(status_code=404, detail=f"Index - '{index}' does not exists")
+
+    def index_or_alias_exists(self, index_or_alias: str) -> bool:
+        """
+        Check if an index or alias exists or not
+
+        Parameters
+        ----------
+        index_or_alias: str
+
+        """
+        try:
+            return self.client.indices.exists(index_or_alias) or self.client.indices.exists_alias(index_or_alias)
+        except Exception:
+            raise HTTPException(status_code=500, detail="Index or alias existence check failed - Internal Server Error")
 
     def index_document(self, index: str, document: dict) -> bool:
         """
@@ -88,7 +226,7 @@ class ElasticSearchClient:
         try:
             self.client.index(index=index, body=document)
             return True
-        except Exception as e:
+        except Exception:
             raise HTTPException(status_code=500, detail="Document indexing failed - Internal Server Error")
 
     def search_document(self, index: str, query: dict) -> dict:
@@ -114,7 +252,7 @@ class ElasticSearchClient:
         """
         try:
             return self.client.search(index=index, body=query)
-        except Exception as e:
+        except Exception:
             raise HTTPException(status_code=500, detail="Document search failed - Internal Server Error")
 
     def delete_document_by_id(self, index: str, document_id: str) -> bool:
@@ -141,7 +279,7 @@ class ElasticSearchClient:
         try:
             self.client.delete(index=index, id=document_id)
             return True
-        except Exception as e:
+        except Exception:
             raise HTTPException(status_code=500, detail="Document deletion failed - Internal Server Error")
 
     def delete_document_by_query(self, index: str, query: dict) -> bool:
@@ -168,7 +306,7 @@ class ElasticSearchClient:
         try:
             self.client.delete_by_query(index=index, body=query)
             return True
-        except Exception as e:
+        except Exception:
             raise HTTPException(status_code=500, detail="Document deletion failed - Internal Server Error")
 
     def update_document_by_id(self, index: str, document_id: str, document: dict) -> bool:
@@ -197,7 +335,7 @@ class ElasticSearchClient:
         try:
             self.client.update(index=index, id=document_id, body={"doc": document})
             return True
-        except Exception as e:
+        except Exception:
             raise HTTPException(status_code=500, detail="Document update failed - Internal Server Error")
 
     def update_document_by_query(self, index: str, query: dict, document: dict) -> bool:
@@ -226,5 +364,31 @@ class ElasticSearchClient:
         try:
             self.client.update_by_query(index=index, query=query, body={"doc": document})
             return True
-        except Exception as e:
+        except Exception:
             raise HTTPException(status_code=500, detail="Document update failed - Internal Server Error")
+
+    def get_document_by_id(self, index: str, document_id: str) -> dict:
+        """
+        Get document in elasticsearch index
+
+        Parameters
+        ----------
+        index: str
+            Name of the index to be created
+        document_id: str
+            Id of the document to be fetched
+
+        Returns
+        -------
+        dict
+            Document
+
+        Raises
+        ------
+        HTTPException
+            500 - If document fetch fails
+        """
+        try:
+            return self.client.get(index=index, id=document_id)
+        except Exception:
+            raise HTTPException(status_code=500, detail="Document fetch failed - Internal Server Error")

@@ -11,9 +11,23 @@ es_client = ElasticSearchClient()
 router = APIRouter(prefix="/index", tags=["index"])
 
 
+@router.get("/")
+async def get_indices() -> JSONResponse:
+    """
+    Get all elasticsearch indices
+
+    Returns
+    -------
+    JSONResponse
+        JSON response with all indices
+    """
+    indices = es_client.get_indices()
+    return JSONResponse(status_code=200, content=indices)
+
+
 @router.post("/")
 async def create_index(
-    index: PlantIndexCreate, db=Depends(get_db)) -> JSONResponse:
+        index: PlantIndexCreate, db=Depends(get_db)) -> JSONResponse:
     """
     Create elasticsearch index for given index name
 
@@ -40,9 +54,9 @@ async def create_index(
     """
     if es_client.create_index(index.index_name):
         try:
-            PlantIndex(index_name=index.index_name,
+            plant_idx = PlantIndex(index_name=index.index_name,
                        description=index.description)
-            db.add(PlantIndex)
+            db.add(plant_idx)
             db.commit()
             db.refresh(PlantIndex)
         except Exception:
@@ -96,10 +110,10 @@ async def delete_index(index_name: str, db=Depends(get_db)) -> JSONResponse:
 
 @router.put("/{index_name}")
 async def update_index(
-    index_name: str,
-    description: str = Body(None),
-    alias: str = Body(None),
-    db=Depends(get_db)
+        index_name: str,
+        description: str = Body(None),
+        alias: str = Body(None),
+        db=Depends(get_db)
 ) -> JSONResponse:
     """
     Update elasticsearch index for given index name
@@ -155,7 +169,7 @@ async def update_index(
 
 @router.get("/{index_name}/search")
 async def search_index(
-    index_name: str, field: str = Query(None), query: str = Query(None)
+        index_name: str, field: str = Query(None), query: str = Query(None)
 ) -> JSONResponse:
     """
     Search elasticsearch index for given index name and query

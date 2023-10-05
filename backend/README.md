@@ -1,12 +1,12 @@
 # Backend
 
-## docker-runner
+## docker_runner
 
 > [!NOTE]  
-> Before getting started please make sure you have provided necessary permissions for the `./scripts/docker-runner.sh` script.
-> You can do this by running the following command: `chmod +x scripts/docker-runner.sh`
+> Before getting started please make sure you have provided necessary permissions for the `./scripts/docker_runner.sh` script.
+> You can do this by running the following command: `chmod +x scripts/docker_runner.sh`
 
-The `docker-runner.sh` script is used to setup the docker containers for the backend. The script can be 
+The `docker_runner.sh` script is used to setup the docker containers for the backend. The script can be 
 used to setup the following containers:
 1. Elasticsearch
 2. Kibana
@@ -23,7 +23,7 @@ the logstash configurations in the `docker/logstash.conf` file.
 To setup the elasticsearch, kibana and logstash docker containers, run the following command:
 
 ```bash
-./scripts/docker-runner.sh -d elk
+./scripts/docker_runner.sh -d elk
 ```
 
 > **Note:** The `-d` flag is used to run the containers in the background.
@@ -43,19 +43,19 @@ You can use the following ports to access the services: `http://localhost:<port>
 #### Stop
 To stop the containers, run the following command:
 ```bash
-./scripts/docker-runner.sh -s elk
+./scripts/docker_runner.sh -s elk
 ```
 
 #### Logs
 To view the logs of the containers, run the following command:
 ```bash
-./scripts/docker-runner.sh -l elk
+./scripts/docker_runner.sh -l elk
 ```
 
 #### Help
 To view the help menu, run the following command:
 ```bash
-./scripts/docker-runner.sh -h
+./scripts/docker_runner.sh -h
 ```
 
 --------------------------------------------

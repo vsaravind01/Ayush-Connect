@@ -55,7 +55,7 @@ case ${cmd_option} in
         docker-compose -f "../docker/${file}" up
         ;;
     -l|--logs)
-        docker-compose -f "../docker/${file}" logs
+        docker-compose -f "../docker/${file}" logs "${@:3}"
         ;;
     -s|--stop)
         docker-compose -f "../docker/${file}" down

@@ -12,6 +12,53 @@ class ElasticSearchClient:
             hosts = [os.environ['ELASTICSEARCH_HOST']]
         self.client = Elasticsearch(hosts=hosts)
 
+    def get_index_uuid(self, index: str) -> str:
+        """
+        Get uuid for given index
+
+        Parameters
+        ----------
+        index: str
+            Name of the index
+
+        Returns
+        -------
+        str
+            UUID
+
+        Raises
+        ------
+        HTTPException
+            404 - If index does not exist
+            500 - If uuid fetch fails
+        """
+        if self.client.indices.exists(index=index):
+            try:
+                return self.client.indices.get_settings(index=index)[index]['settings']['index']['uuid']
+            except Exception:
+                raise HTTPException(status_code=500, detail="UUID fetch failed - Internal Server Error")
+        else:
+            raise HTTPException(status_code=404, detail=f"Index - '{index}' does not exists")
+
+    def get_indices(self, header: str = "index") -> list:
+        """
+        Get all the indices in elasticsearch
+
+        Returns
+        -------
+        list
+            List of indices
+
+        Raises
+        ------
+        HTTPException
+            500 - If index fetch fails
+        """
+        try:
+            return self.client.cat.indices(h=header, s='index').split()
+        except Exception:
+            raise HTTPException(status_code=500, detail="Index fetch failed - Internal Server Error")
+
     def index_exists(self, index_name: str) -> bool:
         """
         Check if an index exists or not

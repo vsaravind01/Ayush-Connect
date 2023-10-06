@@ -18,8 +18,7 @@ async def get_indices() -> JSONResponse:
 
     Returns
     -------
-    JSONResponse
-        JSON response with all indices
+    - **JSONResponse**: JSON response with all indices
     """
     indices = es_client.get_indices()
     return JSONResponse(status_code=200, content=indices)
@@ -33,24 +32,21 @@ async def create_index(
 
     Parameters
     ----------
-    index: PlantIndexCreate
-        Index details
-        - index_name: Name of the index to be created
-        - description: Description of the index to be created
-        - alias: Alias of the index to be created
-    db: Session
-        Database session
+    - **index**: (PlantIndexCreate) Index details
+        - **index_name**: Name of the index to be created
+        - **description**: Description of the index to be created
+        - **alias**: Alias of the index to be created
+    **db**: (Session) Database session
 
     Returns
     -------
-    JSONResponse
-        JSON response with status of the index creation
+    - **JSONResponse**: JSON response with status of the index creation
 
     Raises
     ------
-    HTTPException
-        409 - If index already exists
-        500 - If index creation fails
+    - **HTTPException**
+        - **409** - If index already exists
+        - **500** - If index creation fails
     """
     if es_client.create_index(index.index_name):
         try:
@@ -77,21 +73,18 @@ async def delete_index(index_name: str, db=Depends(get_db)) -> JSONResponse:
 
     Parameters
     ----------
-    index_name: str
-        Name of the index to be deleted
-    db: Session
-        Database session
+    - **index_name**: (str) Name of the index to be deleted
+    - **db**: (Session) Database session
 
     Returns
     -------
-    JSONResponse
-        JSON response with status of the index deletion
+    - **JSONResponse**: JSON response with status of the index deletion
 
     Raises
     ------
-    HTTPException
-        404 - If index does not exist
-        500 - If index deletion fails
+    - **HTTPException**
+        - **404** - If index does not exist
+        - **500** - If index deletion fails
     """
     if es_client.delete_index(index_name):
         try:
@@ -120,25 +113,20 @@ async def update_index(
 
     Parameters
     ----------
-    index_name: str
-        Name of the index to be updated
-    description: str
-        Description of the index to be updated
-    alias: str
-        Alias of the index to be updated
-    db: Session
-        Database session
+    - **index_name**: (str) Name of the index to be updated
+    - **description**: (str) Description of the index to be updated
+    - **alias**: (str) Alias of the index to be updated
+    - **db**: (Session) Database session
 
     Returns
     -------
-    JSONResponse
-        JSON response with status of the index update
+    - **JSONResponse**: JSON response with status of the index update
 
     Raises
     ------
-    HTTPException
-        404 - If index does not exist
-        500 - If index update fails
+    - **HTTPException**
+        - **404** - If index does not exist
+        - **500** - If index update fails
     """
     if es_client.index_exists(index_name):
         try:
@@ -176,24 +164,20 @@ async def search_index(
 
     Parameters
     ----------
-    index_name: str
-        Name of the index to be searched
-    field: str
-        Field to be searched
-    query: str
-        Query to be searched
+    - **index_name**: (str) Name of the index to be searched
+    - **field**: (str) Field to be searched
+    - **query**: (str) Query to be searched
 
     Returns
     -------
-    JSONResponse
-        JSON response with search results
+    - **JSONResponse**: JSON response with search results
 
     Raises
     ------
-    HTTPException
-        400 - If field or query is not provided
-        404 - If index does not exist
-        500 - If search fails
+    - **HTTPException**
+        - **400** - If field or query is not provided
+        - **404** - If index does not exist
+        - **500** - If search fails
     """
     if not field or not query:
         raise HTTPException(status_code=400,

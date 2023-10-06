@@ -18,19 +18,17 @@ class ElasticSearchClient:
 
         Parameters
         ----------
-        index: str
-            Name of the index
+        - **index**: (str) Name of the index
 
         Returns
         -------
-        str
-            UUID
+        - **str**: UUID of the index
 
         Raises
         ------
-        HTTPException
-            404 - If index does not exist
-            500 - If uuid fetch fails
+        - **HTTPException**
+            - **404** - If index does not exist
+            - **500** - If UUID fetch fails
         """
         if self.client.indices.exists(index=index):
             try:
@@ -44,15 +42,18 @@ class ElasticSearchClient:
         """
         Get all the indices in elasticsearch
 
+        Parameters
+        ----------
+        - **header**: (str) Header of the indices
+
         Returns
         -------
-        list
-            List of indices
+        - **list**: List of indices
 
         Raises
         ------
-        HTTPException
-            500 - If index fetch fails
+        - **HTTPException**
+            - **500** - If index fetch fails
         """
         try:
             return self.client.cat.indices(h=header, s='index').split()
@@ -65,8 +66,11 @@ class ElasticSearchClient:
 
         Parameters
         ----------
-        index_name: str
+        - **index_name**: (str) Name of the index
 
+        Returns
+        -------
+        - **bool**: Status of the index existence
         """
         return self.client.indices.exists(index_name)
 
@@ -105,19 +109,17 @@ class ElasticSearchClient:
 
         Parameters
         ----------
-        index: str
-            Name of the index to be deleted
+        - **index**: (str) Name of the index to be deleted
 
         Returns
         -------
-        bool
-            Status of the index deletion
+        - **bool**: Status of the index deletion
 
         Raises
         ------
-        HTTPException
-            404 - If index does not exist
-            500 - If index deletion fails
+        - **HTTPException**
+            - **404** - If index does not exist
+            - **500** - If index deletion fails
         """
         if self.client.indices.exists(index):
             try:
@@ -134,21 +136,18 @@ class ElasticSearchClient:
 
         Parameters
         ----------
-        index: str
-            Name of the index
-        alias: str
-            Alias name for the index
+        - **index**: (str) Name of the index
+        - **alias**: (str) Alias name for the index
 
         Returns
         -------
-        bool
-            Status of the alias creation
+        - **bool**: Status of the alias creation
 
         Raises
         ------
-        HTTPException
-            404 - If index does not exist
-            500 - If alias creation fails
+        - **HTTPException**
+            - **404** - If index does not exist
+            - **500** - If alias creation fails
         """
         if self.client.indices.exists(index):
             try:
@@ -165,8 +164,11 @@ class ElasticSearchClient:
 
         Parameters
         ----------
-        alias: str
+        - **alias**: (str) Name of the alias
 
+        Returns
+        -------
+        - **bool**: Status of the alias existence
         """
         return self.client.indices.exists_alias(alias)
 
@@ -176,21 +178,18 @@ class ElasticSearchClient:
 
         Parameters
         ----------
-        index: str
-            Name of the index
-        alias: str
-            Alias name for the index
+        - **index**: (str) Name of the index
+        - **alias**: (str) Alias name for the index
 
         Returns
         -------
-        bool
-            Status of the alias deletion
+        - **bool**: Status of the alias deletion
 
         Raises
         ------
-        HTTPException
-            404 - If index does not exist
-            500 - If alias deletion fails
+        - **HTTPException**
+            - **404** - If index does not exist
+            - **500** - If alias deletion fails
         """
         if self.client.indices.exists(index):
             try:
@@ -207,21 +206,18 @@ class ElasticSearchClient:
 
         Parameters
         ----------
-        index: str
-            Name of the index
-        alias: str
-            Alias name for the index
+        - **index**: (str) Name of the index
+        - **alias**: (str) Alias name for the index
 
         Returns
         -------
-        bool
-            Status of the alias update
+        - **bool**: Status of the alias update
 
         Raises
         ------
-        HTTPException
-            404 - If index does not exist
-            500 - If alias update fails
+        - **HTTPException**
+            - **404** - If index does not exist
+            - **500** - If alias update fails
         """
         if self.client.indices.exists(index):
             try:
@@ -241,8 +237,16 @@ class ElasticSearchClient:
 
         Parameters
         ----------
-        index_or_alias: str
+        - **index_or_alias**: (str) Name of the index or alias
 
+        Returns
+        -------
+        - **bool**: Status of the index or alias existence
+
+        Raises
+        ------
+        - **HTTPException**
+            - **500** - If index or alias existence check fails
         """
         try:
             return self.client.indices.exists(index_or_alias) or self.client.indices.exists_alias(index_or_alias)
@@ -255,20 +259,17 @@ class ElasticSearchClient:
 
         Parameters
         ----------
-        index: str
-            Name of the index to be created
-        document: dict
-            Document to be indexed
+        - **index**: (str) Name of the index to be created
+        - **document**: (dict) Document to be indexed
 
         Returns
         -------
-        bool
-            Status of the document indexing
+        - **bool**: Status of the document indexing
 
         Raises
         ------
-        HTTPException
-            500 - If document indexing fails
+        - **HTTPException**
+            - **500** - If document indexing fails
         """
         try:
             self.client.index(index=index, body=document)
@@ -282,20 +283,17 @@ class ElasticSearchClient:
 
         Parameters
         ----------
-        index: str
-            Name of the index to be created
-        query: dict
-            Query to be searched
+        - **index**: (str) Name of the index to be created
+        - **query**: (dict) Query to be searched
 
         Returns
         -------
-        dict
-            Search results
+        - **dict**: Search results
 
         Raises
         ------
-        HTTPException
-            500 - If document search fails
+        - **HTTPException**
+            - **500** - If document search fails
         """
         try:
             return self.client.search(index=index, body=query)
@@ -308,20 +306,17 @@ class ElasticSearchClient:
 
         Parameters
         ----------
-        index: str
-            Name of the index to be created
-        document_id: str
-            Id of the document to be deleted
+        - **index**: (str) Name of the index to be created
+        - **document_id**: (str) Id of the document to be deleted
 
         Returns
         -------
-        bool
-            Status of the document deletion
+        - **bool**: Status of the document deletion
 
         Raises
         ------
-        HTTPException
-            500 - If document deletion fails
+        - **HTTPException**
+            - **500** - If document deletion fails
         """
         try:
             self.client.delete(index=index, id=document_id)
@@ -335,20 +330,17 @@ class ElasticSearchClient:
 
         Parameters
         ----------
-        index: str
-            Name of the index to be created
-        query: dict
-            Query to be searched
+        - **index**: (str) Name of the index to be created
+        - **query**: (dict) Query to be searched
 
         Returns
         -------
-        bool
-            Status of the document deletion
+        - **bool**: Status of the document deletion
 
         Raises
         ------
-        HTTPException
-            500 - If document deletion fails
+        - **HTTPException**
+            - **500** - If document deletion fails
         """
         try:
             self.client.delete_by_query(index=index, body=query)
@@ -362,22 +354,18 @@ class ElasticSearchClient:
 
         Parameters
         ----------
-        index: str
-            Name of the index to be created
-        document_id: str
-            Id of the document to be updated
-        document: dict
-            Document to be updated
+        - **index**: (str) Name of the index to be created
+        - **document_id**: (str) Id of the document to be updated
+        - **document**: (dict) Document to be updated
 
         Returns
         -------
-        bool
-            Status of the document update
+        - **bool**: Status of the document update
 
         Raises
         ------
-        HTTPException
-            500 - If document update fails
+        - **HTTPException**
+            - **500** - If document update fails
         """
         try:
             self.client.update(index=index, id=document_id, body={"doc": document})
@@ -391,22 +379,18 @@ class ElasticSearchClient:
 
         Parameters
         ----------
-        index: str
-            Name of the index to be created
-        query: dict
-            Query to be searched
-        document: dict
-            Document to be updated
+        - **index**: (str) Name of the index to be created
+        - **query**: (dict) Query to be searched
+        - **document**: (dict) Document to be updated
 
         Returns
         -------
-        bool
-            Status of the document update
+        - **bool**: Status of the document update
 
         Raises
         ------
-        HTTPException
-            500 - If document update fails
+        - **HTTPException**
+            - **500** - If document update fails
         """
         try:
             self.client.update_by_query(index=index, query=query, body={"doc": document})
@@ -420,20 +404,17 @@ class ElasticSearchClient:
 
         Parameters
         ----------
-        index: str
-            Name of the index to be created
-        document_id: str
-            Id of the document to be fetched
+        - **index**: (str) Name of the index to be created
+        - **document_id**: (str) Id of the document to be fetched
 
         Returns
         -------
-        dict
-            Document
+        - **dict**: Document fetched
 
         Raises
         ------
-        HTTPException
-            500 - If document fetch fails
+        - **HTTPException**
+            - **500** - If document fetch fails
         """
         try:
             return self.client.get(index=index, id=document_id)

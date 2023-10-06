@@ -6,7 +6,6 @@ from app.database import Base, sync_engine, SessionLocal
 from app.index.utils.es import ElasticSearchClient
 from app.index.models import PlantIndex
 
-es_client = ElasticSearchClient()
 
 Base.metadata.create_all(bind=sync_engine)
 
@@ -17,6 +16,19 @@ app.include_router(index_router)
 
 @app.on_event("startup")
 async def startup_event():
+    """
+    Startup event - called when the server starts
+    Adds existing elasticsearch indices to database (plant_idx table)
+
+    Raises
+    ------
+    - **ValueError**: If elasticsearch is offline
+    """
+    es_client = ElasticSearchClient()
+
+    if not es_client.client.ping():
+        raise ValueError("elasticsearch is offline")
+
     db = SessionLocal()
     # add existing elasticsearch indices to database (plant_idx table)
     indices = es_client.get_indices()
@@ -39,11 +51,29 @@ async def startup_event():
 
 @app.get("/")
 async def root():
+    """
+    Root endpoint
+
+    Returns
+    -------
+    - **JSONResponse**: JSON response with message and version
+    """
     return {"message": "Ayush Connect API", "version": "0.1.0"}
 
 
 @app.get("/healthcheck", status_code=status.HTTP_200_OK)
 async def perform_healthcheck(db=Depends(get_db)):
+    """
+    Healthcheck endpoint
+
+    Parameters
+    ----------
+    - **db**: (Session) Database session
+
+    Returns
+    -------
+    - **JSONResponse**: JSON response with status of the database connection
+    """
     result = db.execute(text("SELECT 1"))
     one = result.one()
     if not one[0] == 1:

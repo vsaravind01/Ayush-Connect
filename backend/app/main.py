@@ -5,8 +5,6 @@ from app.index.router import router as index_router
 from app.database import Base, sync_engine, SessionLocal
 from app.index.utils.es import ElasticSearchClient
 from app.index.models import PlantIndex
-from uuid import UUID
-from app.index.schemas import PlantIndexCreate
 
 es_client = ElasticSearchClient()
 
@@ -29,8 +27,9 @@ async def startup_event():
         if index not in db_indices:
             try:
                 idx_uuid = es_client.get_index_uuid(index)
-                uuid = UUID(idx_uuid).hex
-                plant_idx = PlantIndex(id=uuid, index_name=index, description=f"Initalized '{index}'")
+                plant_idx = PlantIndex(idx_uuid=idx_uuid,
+                                       index_name=index,
+                                       description=f"Initialized '{index}'")
                 db.add(plant_idx)
                 db.commit()
             except Exception as e:

@@ -5,11 +5,13 @@ from app.index.models import PlantIndex
 from app.index.utils.es import ElasticSearchClient
 from app.index.schemas import PlantIndexCreate
 from app.index.dependencies import get_db
+from app.index.plants.router import router as plant_router
 
 es_client = ElasticSearchClient()
 
 router = APIRouter(prefix="/index", tags=["index"])
 
+router.include_router(plant_router)
 
 @router.get("/")
 async def get_indices() -> JSONResponse:

@@ -33,6 +33,7 @@ async def startup_event():
     # add existing elasticsearch indices to database (plant_idx table)
     indices = es_client.get_indices()
     db_indices = db.query(PlantIndex).all()
+    idx_uuids = [index.idx_uuid for index in db_indices]
     db_indices = [index.index_name for index in db_indices]
 
     for index in indices:
@@ -46,7 +47,17 @@ async def startup_event():
                 db.commit()
             except Exception as e:
                 print(e)
+        elif es_client.get_index_uuid(index) not in idx_uuids:
+            try:
+                idx_uuid = es_client.get_index_uuid(index)
+                plant_idx = db.query(PlantIndex).filter(
+                    PlantIndex.index_name == index).first()
+                plant_idx.idx_uuid = idx_uuid
+                db.commit()
+            except Exception as e:
+                print(e)
     db.close()
+    es_client.client.close()
 
 
 @app.get("/")

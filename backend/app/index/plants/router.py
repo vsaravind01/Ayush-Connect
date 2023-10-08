@@ -34,7 +34,7 @@ async def get_plants(page: int = Query(1, ge=1),
 async def search_plants(
         query: str = Query(..., min_length=3),
         fields: str = Query(
-            "generic name,scientific name,accepted scientific name"),
+            "generic_name,scientific_name,accepted_scientific_name"),
         page: int = Query(1, ge=1),
         size: int = Query(20, ge=1, le=50)) -> JSONResponse:
     """

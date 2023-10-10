@@ -1,5 +1,6 @@
 from app.index.utils.es import ElasticSearchClient
 from fastapi import APIRouter, Body, Depends, Query
+from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse
 
 es_client = ElasticSearchClient()
@@ -118,3 +119,113 @@ async def get_plant(plant_id: str) -> JSONResponse:
     client = es_client.client
     response = client.get(index="plants", id=plant_id)
     return JSONResponse(status_code=200, content=response.body)
+
+
+@router.post("/")
+async def add_plants(plant_data: dict = Body(...)) -> JSONResponse:
+    """
+    Add plant records to the Elasticsearch index.
+
+    Parameters
+    ----------
+    - **plant_data**: (dict) JSON data containing plant information.
+
+    Returns
+    -------
+    - **JSONResponse**: JSON response indicating the success or failure of the addition.
+
+    Raises
+    ------
+    - **HTTPException**:
+        - **500** - If the addition fails.
+    """
+    try:
+        # Add the plant record to the Elasticsearch index
+        response = es_client.add_document("plants", plant_data)
+        
+        if response:
+            return JSONResponse(
+                status_code=201, 
+                content={
+                    "message": "Plant records added successfully"
+                })
+        else:
+            return JSONResponse(
+                status_code=500, 
+                content={
+                    "message": "Failed to add plant records to the index"
+                })
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Plant record addition failed - Internal Server Error: {str(e)}")
+
+
+@router.put("/{plant_id}")
+async def update_plant(plant_id: str, plant_data: dict = Body(...)) -> JSONResponse:
+    """
+    Update a plant record in the Elasticsearch index.
+
+    Parameters
+    ----------
+    - **plant_id**: (str) Plant ID to be updated.
+    - **plant_data**: (dict) JSON data containing updated plant information.
+
+    Returns
+    -------
+    - **JSONResponse**: JSON response indicating the success or failure of the update.
+
+    Raises
+    ------
+    - **HTTPException**:
+        - **500** - If the update fails.
+    """
+    try:
+        # Update the plant record in the Elasticsearch index
+        response = es_client.update_document_by_id("plants", plant_id, plant_data)
+        
+        if response:
+            return JSONResponse(
+                status_code=200, 
+                content={
+                    "message": "Plant record updated successfully"
+                })
+        else:
+            return JSONResponse(
+                status_code=500, 
+                content={
+                    "message": "Failed to update plant record"
+                })
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Plant record update failed - Internal Server Error: {str(e)}")
+
+
+@router.delete("/{plant_id}")
+async def delete_plant(plant_id: str) -> JSONResponse:
+    """
+    Delete a plant from plants index
+
+    Parameters
+    ----------
+    - **plant_id**: (str) Plant id
+
+    Returns
+    -------
+    - **JSONResponse**: JSON response indicating the success or failure of the deletion
+    """
+    response = es_client.delete_document_by_id(index="plants", document_id=plant_id)
+    
+    if response:
+        return JSONResponse(
+            status_code=200, 
+            content={
+                "message": "Plant deleted successfully"
+            })
+    else:
+        return JSONResponse(
+            status_code=404, 
+            content={
+                "message": "Plant not found or deletion failed"
+            })

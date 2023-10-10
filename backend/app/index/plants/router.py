@@ -82,7 +82,7 @@ async def get_plant(plant_id: str) -> JSONResponse:
     return JSONResponse(status_code=200, content=response.body)
 
 
-@router.post("/add")
+@router.post("/")
 async def add_plants(plant_data: dict = Body(...)) -> JSONResponse:
     """
     Add plant records to the Elasticsearch index.

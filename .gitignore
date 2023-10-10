@@ -7,3 +7,4 @@
 
 # docker volume data!/backend/docker/logstash_data/plugins/inputs/file/.sincedb
 /backend/docker/logstash_data/
+/backend/docker/logstash_data/plugins/inputs/file/.sincedb

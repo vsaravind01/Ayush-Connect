@@ -2,16 +2,18 @@ from fastapi import Depends, FastAPI, HTTPException, status
 from sqlalchemy import text
 from app.index.dependencies import get_db
 from app.index.router import router as index_router
+from app.auth.router import router as auth_router
 from app.database import Base, sync_engine, SessionLocal
 from app.index.utils.es import ElasticSearchClient
 from app.index.models import PlantIndex
-
+from app.auth.models import User
 
 Base.metadata.create_all(bind=sync_engine)
 
 app = FastAPI()
 
 app.include_router(index_router)
+app.include_router(auth_router)
 
 
 @app.on_event("startup")

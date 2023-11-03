@@ -1,17 +1,19 @@
 from fastapi import APIRouter, Body, Depends, Query
 from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse
-from app.index.models import PlantIndex
-from app.index.utils.es import ElasticSearchClient
-from app.index.schemas import PlantIndexCreate
+
 from app.index.dependencies import get_db
+from app.index.models import PlantIndex
 from app.index.plants.router import router as plant_router
+from app.index.schemas import PlantIndexCreate
+from app.index.utils.es import ElasticSearchClient
 
 es_client = ElasticSearchClient()
 
 router = APIRouter(prefix="/index", tags=["index"])
 
 router.include_router(plant_router)
+
 
 @router.get("/")
 async def get_indices() -> JSONResponse:
@@ -27,8 +29,7 @@ async def get_indices() -> JSONResponse:
 
 
 @router.post("/")
-async def create_index(
-        index: PlantIndexCreate, db=Depends(get_db)) -> JSONResponse:
+async def create_index(index: PlantIndexCreate, db=Depends(get_db)) -> JSONResponse:
     """
     Create elasticsearch index for given index name
 
@@ -52,20 +53,20 @@ async def create_index(
     """
     if es_client.create_index(index.index_name):
         try:
-            plant_idx = PlantIndex(index_name=index.index_name,
-                       description=index.description)
+            plant_idx = PlantIndex(
+                index_name=index.index_name, description=index.description
+            )
             db.add(plant_idx)
             db.commit()
             db.refresh(PlantIndex)
         except Exception:
             raise HTTPException(
-                status_code=500,
-                detail="Index creation failed - Internal Server Error")
+                status_code=500, detail="Index creation failed - Internal Server Error"
+            )
         return JSONResponse(
             status_code=201,
-            content={
-                "message": f"Index - '{index.index_name}' created successfully"
-            })
+            content={"message": f"Index - '{index.index_name}' created successfully"},
+        )
 
 
 @router.delete("/{index_name}")
@@ -90,25 +91,23 @@ async def delete_index(index_name: str, db=Depends(get_db)) -> JSONResponse:
     """
     if es_client.delete_index(index_name):
         try:
-            db.query(PlantIndex).filter(
-                PlantIndex.index_name == index_name).delete()
+            db.query(PlantIndex).filter(PlantIndex.index_name == index_name).delete()
             return JSONResponse(
                 status_code=200,
-                content={
-                    "message": f"Index - '{index_name}' deleted successfully"
-                })
+                content={"message": f"Index - '{index_name}' deleted successfully"},
+            )
         except Exception:
             raise HTTPException(
-                status_code=500,
-                detail="Index deletion failed - Internal Server Error")
+                status_code=500, detail="Index deletion failed - Internal Server Error"
+            )
 
 
 @router.put("/{index_name}")
 async def update_index(
-        index_name: str,
-        description: str = Body(None),
-        alias: str = Body(None),
-        db=Depends(get_db)
+    index_name: str,
+    description: str = Body(None),
+    alias: str = Body(None),
+    db=Depends(get_db),
 ) -> JSONResponse:
     """
     Update elasticsearch index for given index name
@@ -139,27 +138,29 @@ async def update_index(
             elif alias:
                 update_dict = {"alias": alias}
             else:
-                raise HTTPException(status_code=400,
-                                    detail="Description or alias is required")
-            db.query(PlantIndex).filter(
-                PlantIndex.index_name == index_name).update(update_dict)
+                raise HTTPException(
+                    status_code=400, detail="Description or alias is required"
+                )
+            db.query(PlantIndex).filter(PlantIndex.index_name == index_name).update(
+                update_dict
+            )
             return JSONResponse(
                 status_code=200,
-                content={
-                    "message": f"Index - '{index_name}' updated successfully"
-                })
+                content={"message": f"Index - '{index_name}' updated successfully"},
+            )
         except Exception:
             raise HTTPException(
-                status_code=500,
-                detail="Index update failed - Internal Server Error")
+                status_code=500, detail="Index update failed - Internal Server Error"
+            )
     else:
-        raise HTTPException(status_code=404,
-                            detail=f"Index - '{index_name}' does not exists")
+        raise HTTPException(
+            status_code=404, detail=f"Index - '{index_name}' does not exists"
+        )
 
 
 @router.get("/{index_name}/search")
 async def search_index(
-        index_name: str, field: str = Query(None), query: str = Query(None)
+    index_name: str, field: str = Query(None), query: str = Query(None)
 ) -> JSONResponse:
     """
     Search elasticsearch index for given index name and query
@@ -182,8 +183,7 @@ async def search_index(
         - **500** - If search fails
     """
     if not field or not query:
-        raise HTTPException(status_code=400,
-                            detail="Field and query are required")
+        raise HTTPException(status_code=400, detail="Field and query are required")
 
     if es_client.index_or_alias_exists(index_name):
         try:
@@ -191,8 +191,10 @@ async def search_index(
             results = es_client.search_document(index_name, q)
             return JSONResponse(status_code=200, content=results)
         except Exception:
-            raise HTTPException(status_code=500,
-                                detail="Search failed - Internal Server Error")
+            raise HTTPException(
+                status_code=500, detail="Search failed - Internal Server Error"
+            )
     else:
-        raise HTTPException(status_code=404,
-                            detail=f"Index - '{index_name}' does not exists")
+        raise HTTPException(
+            status_code=404, detail=f"Index - '{index_name}' does not exists"
+        )

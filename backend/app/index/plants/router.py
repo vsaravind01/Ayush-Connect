@@ -141,23 +141,23 @@ async def add_plants(plant_data: dict = Body(...)) -> JSONResponse:
     """
     try:
         # Add the plant record to the Elasticsearch index
-        response = es_client.add_document("plants", plant_data)
-        
+        response = es_client.index_document("plants", plant_data)
+
         if response:
             return JSONResponse(
-                status_code=201, 
+                status_code=201,
                 content={
                     "message": "Plant records added successfully"
                 })
         else:
             return JSONResponse(
-                status_code=500, 
+                status_code=500,
                 content={
                     "message": "Failed to add plant records to the index"
                 })
     except Exception as e:
         raise HTTPException(
-            status_code=500, 
+            status_code=500,
             detail=f"Plant record addition failed - Internal Server Error: {str(e)}")
 
 
@@ -183,22 +183,22 @@ async def update_plant(plant_id: str, plant_data: dict = Body(...)) -> JSONRespo
     try:
         # Update the plant record in the Elasticsearch index
         response = es_client.update_document_by_id("plants", plant_id, plant_data)
-        
+
         if response:
             return JSONResponse(
-                status_code=200, 
+                status_code=200,
                 content={
                     "message": "Plant record updated successfully"
                 })
         else:
             return JSONResponse(
-                status_code=500, 
+                status_code=500,
                 content={
                     "message": "Failed to update plant record"
                 })
     except Exception as e:
         raise HTTPException(
-            status_code=500, 
+            status_code=500,
             detail=f"Plant record update failed - Internal Server Error: {str(e)}")
 
 
@@ -216,16 +216,16 @@ async def delete_plant(plant_id: str) -> JSONResponse:
     - **JSONResponse**: JSON response indicating the success or failure of the deletion
     """
     response = es_client.delete_document_by_id(index="plants", document_id=plant_id)
-    
+
     if response:
         return JSONResponse(
-            status_code=200, 
+            status_code=200,
             content={
                 "message": "Plant deleted successfully"
             })
     else:
         return JSONResponse(
-            status_code=404, 
+            status_code=404,
             content={
                 "message": "Plant not found or deletion failed"
             })

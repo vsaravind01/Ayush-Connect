@@ -58,7 +58,6 @@ def is_admin(user: UserResponse = Depends(get_current_user)):
 
 
 def is_professional(user: UserResponse = Depends(get_current_user)):
-    print(user.name)
     if user and user.user_type.value == UserType.PROFESSIONAL.value:
         return True
     return False

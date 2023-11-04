@@ -67,7 +67,6 @@ async def signup(user: UserCreate, is_admin: bool = Depends(is_admin), db = Depe
     - **HTTPException**
         - **500** - If user creation fails
     """
-    print(is_admin)
     if user.user_type == UserType.ADMIN and not is_admin:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

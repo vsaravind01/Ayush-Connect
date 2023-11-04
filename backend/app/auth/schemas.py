@@ -14,6 +14,10 @@ class UserCreate(BaseModel):
     password: str
     user_type: UserType
 
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
 class UserUpdate(BaseModel):
     username: str
     name: str

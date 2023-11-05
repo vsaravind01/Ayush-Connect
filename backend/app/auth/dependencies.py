@@ -1,26 +1,26 @@
-#Standard Imports
+# Standard Imports
 import os
 
-#Third Party Imports
+# Third Party Imports
 import jwt
-from jwt.exceptions import ExpiredSignatureError, DecodeError
 from dotenv import load_dotenv
-
-#Fastapi imports
-from fastapi import  Cookie, Depends, status
+# Fastapi imports
+from fastapi import Cookie, Depends, status
 from fastapi.exceptions import HTTPException
+from jwt.exceptions import DecodeError, ExpiredSignatureError
 
-#Ayush-Connect imports
+# Ayush-Connect imports
 from app.auth.models import User
 from app.auth.schemas import UserResponse, UserType
 from app.index.dependencies import get_db
 
 load_dotenv()
 
-SECRET_KEY = os.environ['SECRET_KEY']
-ALGORITHM = os.environ['ALGORITHM']
+SECRET_KEY = os.environ["SECRET_KEY"]
+ALGORITHM = os.environ["ALGORITHM"]
 
-def get_current_user(access_token: str = Cookie(None), db = Depends(get_db)):
+
+def get_current_user(access_token: str = Cookie(None), db=Depends(get_db)):
     if access_token is None:
         return None
     try:

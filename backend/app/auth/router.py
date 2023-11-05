@@ -1,36 +1,35 @@
-#Standard Imports
+# Standard Imports
 import os
-
-#Third Party Imports
-import bcrypt  
-import jwt
-
 from datetime import datetime, timedelta
-from dotenv import load_dotenv
-from passlib.context import CryptContext
 
-#Fastapi imports
+# Third Party Imports
+import bcrypt
+import jwt
+from dotenv import load_dotenv
+# Fastapi imports
 from fastapi import APIRouter, Depends, status
 from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer
+from passlib.context import CryptContext
 
-#Ayush-Connect imports
+# Ayush-Connect imports
 from app.auth.dependencies import get_current_user, is_admin
 from app.auth.models import User
-from app.auth.schemas import UserCreate, UserLogin, UserUpdate, UserResponse, UserType
+from app.auth.schemas import UserCreate, UserLogin, UserResponse, UserType, UserUpdate
 from app.index.dependencies import get_db
 
 load_dotenv()
 
-SECRET_KEY = os.environ['SECRET_KEY']
-ALGORITHM = os.environ['ALGORITHM']
+SECRET_KEY = os.environ["SECRET_KEY"]
+ALGORITHM = os.environ["ALGORITHM"]
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 password_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
 
 def create_jwt_token(data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
@@ -44,7 +43,9 @@ def create_jwt_token(data: dict, expires_delta: timedelta = None):
 
 
 @router.post("/signup")
-async def signup(user: UserCreate, is_admin: bool = Depends(is_admin), db = Depends(get_db)) -> JSONResponse:
+async def signup(
+    user: UserCreate, is_admin: bool = Depends(is_admin), db=Depends(get_db)
+) -> JSONResponse:
     """
     Create a new user in the database.
 
@@ -72,7 +73,7 @@ async def signup(user: UserCreate, is_admin: bool = Depends(is_admin), db = Depe
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Access not provided for creating ADMIN account",
         )
-    
+
     try:
         hashed_password = password_context.hash(user.password)
         db_user = User(
@@ -88,12 +89,13 @@ async def signup(user: UserCreate, is_admin: bool = Depends(is_admin), db = Depe
         db.refresh(db_user)
     except Exception as e:
         raise HTTPException(
-            status_code=500,
-            detail=f"Failed insering into db. Error:{e}"
+            status_code=500, detail=f"Failed insering into db. Error:{e}"
         )
-    
+
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_jwt_token({"username": db_user.username}, expires_delta=access_token_expires)
+    access_token = create_jwt_token(
+        {"username": db_user.username}, expires_delta=access_token_expires
+    )
 
     response = JSONResponse(
         status_code=201,
@@ -101,16 +103,17 @@ async def signup(user: UserCreate, is_admin: bool = Depends(is_admin), db = Depe
             "message": f"User - '{db_user.username}' created successfully.",
             "access_token": access_token,
             "token_type": "bearer",
-        }
+        },
     )
 
-    response.set_cookie("access_token", access_token, max_age=ACCESS_TOKEN_EXPIRE_MINUTES*60)
+    response.set_cookie(
+        "access_token", access_token, max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60
+    )
     return response
 
 
-
 @router.post("/login")
-async def login(user_login: UserLogin, db = Depends(get_db)) -> JSONResponse:
+async def login(user_login: UserLogin, db=Depends(get_db)) -> JSONResponse:
     """
     Log in a user by verifying their credentials and providing an access token.
 
@@ -135,25 +138,31 @@ async def login(user_login: UserLogin, db = Depends(get_db)) -> JSONResponse:
 
     user = db.query(User).filter(User.username == username).first()
 
-    if user is None or not bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
+    if user is None or not bcrypt.checkpw(
+        password.encode("utf-8"), user.password.encode("utf-8")
+    ):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
         )
 
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)  
-    access_token = create_jwt_token({"username": user.username}, expires_delta=access_token_expires)
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_jwt_token(
+        {"username": user.username}, expires_delta=access_token_expires
+    )
 
     response = JSONResponse(
         status_code=201,
         content={
             "message": f"User - '{user.username}' logged in successfully.",
-            "access_token": access_token, 
-            "token_type": "bearer"
-        }
+            "access_token": access_token,
+            "token_type": "bearer",
+        },
     )
 
-    response.set_cookie("access_token", access_token, max_age=ACCESS_TOKEN_EXPIRE_MINUTES*60)
+    response.set_cookie(
+        "access_token", access_token, max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60
+    )
     return response
 
 
@@ -181,11 +190,13 @@ async def logout(user: UserResponse = Depends(get_current_user)):
         response.delete_cookie("access_token")
         return response
 
-    raise HTTPException(status_code=401, detail="No access token found. You are not logged in.")
+    raise HTTPException(
+        status_code=401, detail="No access token found. You are not logged in."
+    )
 
 
 @router.get("/{username}", response_model=UserResponse)
-async def get_user(username: str, db = Depends(get_db)):
+async def get_user(username: str, db=Depends(get_db)):
     """
     Retrieve user information by user ID.
 
@@ -209,15 +220,14 @@ async def get_user(username: str, db = Depends(get_db)):
         if db_user is None:
             raise HTTPException(status_code=404, detail="User not found")
     except Exception:
-        raise HTTPException(
-            status_code=500,
-            detail="Failed to fetch user from db."
-        )
+        raise HTTPException(status_code=500, detail="Failed to fetch user from db.")
     return UserResponse.from_orm(db_user)
 
 
 @router.put("/{username}")
-async def update_user(username: str, user: UserUpdate, db = Depends(get_db)) -> JSONResponse:
+async def update_user(
+    username: str, user: UserUpdate, db=Depends(get_db)
+) -> JSONResponse:
     """
     Update user information by user ID.
 
@@ -246,20 +256,15 @@ async def update_user(username: str, user: UserUpdate, db = Depends(get_db)) -> 
         db.commit()
         db.refresh(db_user)
     except Exception:
-        raise HTTPException(
-            status_code=500,
-            detail="Failed to update user details."
-        )
+        raise HTTPException(status_code=500, detail="Failed to update user details.")
     return JSONResponse(
         status_code=201,
-        content={
-            "message": f"User - '{db_user.username}' updated successfully."
-        }
+        content={"message": f"User - '{db_user.username}' updated successfully."},
     )
 
 
 @router.delete("/{username}")
-async def delete_user(username: str, db = Depends(get_db)) -> JSONResponse:
+async def delete_user(username: str, db=Depends(get_db)) -> JSONResponse:
     """
     Delete a user by user ID.
 
@@ -285,14 +290,8 @@ async def delete_user(username: str, db = Depends(get_db)) -> JSONResponse:
         db.delete(db_user)
         db.commit()
     except Exception:
-        raise HTTPException(
-            status_code=500,
-            detail="Failed to delete user details."
-        )
+        raise HTTPException(status_code=500, detail="Failed to delete user details.")
     return JSONResponse(
         status_code=201,
-        content={
-            "message": f"User - '{db_user.username}' deleted successfully."
-        }
+        content={"message": f"User - '{db_user.username}' deleted successfully."},
     )
-    

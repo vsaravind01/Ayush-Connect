@@ -1,11 +1,14 @@
-from pydantic import BaseModel, Field
-from enum import Enum
 from datetime import datetime
+from enum import Enum
+
+from pydantic import BaseModel
+
 
 class UserType(str, Enum):
     ADMIN = "ADMIN"
     PROFESSIONAL = "PROFESSIONAL"
     CONSUMER = "CONSUMER"
+
 
 class UserCreate(BaseModel):
     username: str
@@ -14,9 +17,11 @@ class UserCreate(BaseModel):
     password: str
     user_type: UserType
 
+
 class UserLogin(BaseModel):
     username: str
     password: str
+
 
 class UserUpdate(BaseModel):
     username: str
@@ -24,6 +29,7 @@ class UserUpdate(BaseModel):
     email: str
     password: str
     user_type: UserType
+
 
 class UserResponse(BaseModel):
     id: int
@@ -46,4 +52,3 @@ class UserResponse(BaseModel):
             created_at=user.created_at,
             updated_at=user.updated_at,
         )
-

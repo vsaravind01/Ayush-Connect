@@ -1,12 +1,16 @@
-from sqlalchemy import Column, String, Integer, Enum, DateTime
 from datetime import datetime
 from enum import Enum as UserEnum
+
+from sqlalchemy import Column, DateTime, Enum, Integer, String
+
 from app.database import Base
+
 
 class UserType(UserEnum):
     ADMIN = "ADMIN"
     PROFESSIONAL = "PROFESSIONAL"
     CONSUMER = "CONSUMER"
+
 
 class User(Base):
     __tablename__ = "users"
@@ -18,4 +22,6 @@ class User(Base):
     password = Column(String, nullable=False)
     user_type = Column(Enum(UserType), nullable=False)
     created_at = Column(DateTime(timezone=True), default=datetime.now)
-    updated_at = Column(DateTime(timezone=True), default=datetime.now, onupdate=datetime.now)
+    updated_at = Column(
+        DateTime(timezone=True), default=datetime.now, onupdate=datetime.now
+    )

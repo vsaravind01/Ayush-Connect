@@ -8,61 +8,87 @@ from transformers import ViTForImageClassification, ViTImageProcessor
 
 
 class VisionTransformer:
+    """Vision Transformer class to predict top k classes for an image.
+
+    Attributes
+    ----------
+    **model_path** : (str) Path to the model checkpoint
+    **model** : (ViTForImageClassification) Vision Transformer model
+    **feature_extractor** : (ViTImageProcessor) Feature extractor for the model
+    **actual_names** : (List) List of actual class names
+
+    Methods
+    -------
+    **predict_top_k(image_path: Path, k: int = 5) -> List** : Predict top k classes for an image
+
+    Raises
+    ------
+    **FileNotFoundError** : If image is not found at the given path
+
+    Example
+    -------
+    >>> from arcane.image_classifier import VisionTransformer
+    >>> vision_transformer = VisionTransformer(model_path="path/to/model_checkpoint")
+    >>> image_path = Path("path/to/image.jpg")
+    >>> top_k_results = vision_transformer.predict_top_k(image_path, k=5)
+    >>> print(top_k_results)
+    """
+
     def __init__(self, model_path: str = "model_checkpoints/checkpoint-1900"):
         self.model_path = model_path
         self.model = ViTForImageClassification.from_pretrained(model_path)
         self.feature_extractor = ViTImageProcessor.from_pretrained(model_path)
         self.actual_names = [
-            "Asthma Plant.zip",
-            "Avaram.zip",
-            "Balloon vine.zip",
-            "Bellyache bush (Green).zip",
-            "Benghal dayflower.zip",
-            "Big Caltrops.zip",
-            "Black-Honey Shrub.zip",
-            "Bristly Wild Grape.zip",
-            "Butterfly Pea.zip",
-            "Cape Gooseberry.zip",
-            "Common Wireweed.zip",
-            "Country Mallow.zip",
-            "Crown flower.zip",
-            "Green Chireta.zip",
-            "Holy Basil.zip",
-            "Indian CopperLeaf.zip",
-            "Indian Jujube.zip",
-            "Indian Sarsaparilla.zip",
-            "Indian Stinging Nettle.zip",
-            "Indian Thornapple.zip",
-            "Indian wormwood.zip",
-            "Ivy Gourd.zip",
-            "Kokilaksha.zip",
-            "Land Caltrops (Bindii).zip",
-            "Madagascar Periwinkle.zip",
-            "Madras Pea Pumpkin.zip",
-            "Malabar Catmint.zip",
-            "Mexican Mint.zip",
-            "Mexican Prickly Poppy.zip",
-            "Mountain Knotgrass.zip",
-            "Nalta Jute.zip",
-            "Night blooming Cereus.zip",
-            "Panicled Foldwing.zip",
-            "Prickly Chaff Flower.zip",
-            "Punarnava.zip",
-            "Purple Fruited Pea Eggplant.zip",
-            "Purple Tephrosia.zip",
-            "Rosary Pea.zip",
-            "Shaggy button weed.zip",
-            "Small Water Clover.zip",
-            "Spiderwisp.zip",
-            "Square Stalked Vine.zip",
-            "Stinking Passionflower.zip",
-            "Sweet Basil.zip",
-            "Sweet flag.zip",
-            "Tinnevelly Senna.zip",
-            "Trellis Vine.zip",
-            "Velvet bean.zip",
-            "coatbuttons.zip",
-            "heart-leaved moonseed.zip",
+            "Asthma Plant",
+            "Avaram",
+            "Balloon vine",
+            "Bellyache bush (Green)",
+            "Benghal dayflower",
+            "Big Caltrops",
+            "Black-Honey Shrub",
+            "Bristly Wild Grape",
+            "Butterfly Pea",
+            "Cape Gooseberry",
+            "Common Wireweed",
+            "Country Mallow",
+            "Crown flower",
+            "Green Chireta",
+            "Holy Basil",
+            "Indian CopperLeaf",
+            "Indian Jujube",
+            "Indian Sarsaparilla",
+            "Indian Stinging Nettle",
+            "Indian Thornapple",
+            "Indian wormwood",
+            "Ivy Gourd",
+            "Kokilaksha",
+            "Land Caltrops (Bindii)",
+            "Madagascar Periwinkle",
+            "Madras Pea Pumpkin",
+            "Malabar Catmint",
+            "Mexican Mint",
+            "Mexican Prickly Poppy",
+            "Mountain Knotgrass",
+            "Nalta Jute",
+            "Night blooming Cereus",
+            "Panicled Foldwing",
+            "Prickly Chaff Flower",
+            "Punarnava",
+            "Purple Fruited Pea Eggplant",
+            "Purple Tephrosia",
+            "Rosary Pea",
+            "Shaggy button weed",
+            "Small Water Clover",
+            "Spiderwisp",
+            "Square Stalked Vine",
+            "Stinking Passionflower",
+            "Sweet Basil",
+            "Sweet flag",
+            "Tinnevelly Senna",
+            "Trellis Vine",
+            "Velvet bean",
+            "coatbuttons",
+            "heart-leaved moonseed",
         ]
 
     def predict_top_k(self, image_path: Path, k: int = 5) -> List:
@@ -93,19 +119,12 @@ class VisionTransformer:
         with torch.no_grad():
             outputs = self.model(input_ids)
 
-        predicted_class_indices = torch.topk(outputs.logits, k=k, dim=1).indices[0]
-        predicted_class_probabilities = torch.topk(outputs.logits, k=k, dim=1).values[0]
+        probs = torch.nn.functional.softmax(outputs.logits, dim=1)
 
-        top_k_class_names = [
-            self.actual_names[index][:-4] for index in predicted_class_indices
-        ]
-
-        top_k_class_probabilities = [
-            probability.item() for probability in predicted_class_probabilities
-        ]
+        top_p, top_class = probs.topk(k, dim=1)
         top_k_results = [
-            {"name": name, "probability": probability}
-            for name, probability in zip(top_k_class_names, top_k_class_probabilities)
+            {"class": self.actual_names[class_idx], "probability": prob.item()}
+            for class_idx, prob in zip(top_class[0], top_p[0])
         ]
 
         return top_k_results

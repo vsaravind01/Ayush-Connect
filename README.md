@@ -1,5 +1,5 @@
 # Ayush-Connect
-A repository for the problem statement SIH1343.
+An AI powered platform that provides information about Ayurvedic medicinal plants for the Ayurvedic pharmaceutical industry . The platform uses a custom vision transformer model to identify the medicinal plants with high accuracy. At the heart of the platform is a chatbot - PlantGPT, that helps the users to interactively get information about the medicinal plants. The project is currently under development and is expected to be released in the upcoming months.
 
 ## Dev Setup
 ### Prerequisites

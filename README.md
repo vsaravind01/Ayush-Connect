@@ -1,9 +1,14 @@
 # Ayush-Connect
 An AI powered platform that provides information about Ayurvedic medicinal plants for the Ayurvedic pharmaceutical industry. The platform uses a custom vision transformer model to identify the medicinal plants with high accuracy. At the heart of the platform is a chatbot - PlantGPT, that helps the users to interactively get information about the medicinal plants.
 
+![output-onlinepngtools (1)-min](https://github.com/user-attachments/assets/d8780f20-8273-4517-b3b3-9878a51d6a56)
+
+![output-onlinepngtools (2)](https://github.com/user-attachments/assets/c7694f76-2300-4887-b4a7-7e700613ecee)
+
+
 ## Dev Setup
 ### Prerequisites
-1. Python 3.8+ - Python 3.10 is recommended. [Get Python](https://www.python.org/downloads/release/python-31011/)
+1. Python 3.8+ (recommended - 3.10). [Get Python](https://www.python.org/downloads/release/python-31011/)
 2. Docker | Docker Compose - [Get Docker](https://docs.docker.com/get-docker/)
 
 After installing the above prerequisites, proceed to clone the repository - `git clone https://github.com/vsaravind01/Ayush-Connect.git`
